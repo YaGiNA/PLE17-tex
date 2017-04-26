@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage{ascmac}
 \usepackage{listings}
+\usepackage{underscore}
 \lstset{
     frame=single,
     numbers=left,
@@ -140,44 +141,108 @@ countの値をquantityに移植、さらにquantityが0を超えることをif�
 %
 \subsubsection{get\_field\_state\_from\_own\_cards()}
 \paragraph{何の処理？}\mbox{}\\
-\paragraph{配列への処理内容}\mbox{}\\
-\paragraph{機能実現への決め手}\mbox{}\\
+引数として受け取った手札のカードテーブルcards[8][15]から、field\_status所蔵の各状態メンバを操作する処理。
+\paragraph{配列への処理内容}
+\subparagraph{場カード状況による操作}
+場にカードがなければ(cards[5][4]の値の有無)field\_statusのis\_no\_cardに1を、革命状態(cards[5][6]の値の有無)ならばis\_revに1を、縛り状態(cards[5][7]の値の有無)ならis\_lockに1を代入する。
+\subparagraph{新場状態の処理}
+新たな場となった場合、field\_status内の場に出されたカードセット数quanityや強さを表すorder、縛りを表すis\_lockや出されたカードのスートを表すsuit[]をすべて初期化する。
+\subparagraph{プレーヤーステータスの整理}
+cards[6][0-4]までが表す手持ちのカード状態をfield\_statusのplayer\_quantity[5]にそれぞれ代入する。
+その後、プレーヤーのランク(役職)がcards[6][5-9]までが表しているので、それぞれをplayer\_rank[5]に代入する。
+最後に、試合ごとにシャッフルされる座席情報がcards[6][10-14]に記載されているので、それぞれをseat[5]に代入する。
+\subparagraph{Joker所持未所持の処理}
+cards[4][1]に2が代入されているのはプレーヤーはJokerを所持していることを表しているため、field\_statusのhave\_jokerに1が代入される。
+\paragraph{機能実現への決め手}
+\subparagraph{場カード状況による操作}
+cards[5][4, 6, 7]にそれぞれ場で発生している状態が一括で記載されており、その値を参照することで可能となった。
+\subparagraph{新場状態の処理}
+操作・参照する変数がfield\_status内メンバで完結しており、わかりやすく処理を書かれることが可能となった。
+\subparagraph{プレーヤーステータスの整理}
+cards[6][1-14]にプレーヤーのステータスが一括で記載されており、それぞれをfor文で囲むことにより、処理をそれぞれ1行ずつで完結することが可能となった。
+\subparagraph{Joker所持未所持の処理}
+cards[4][1]にJokerの有無を2を代入することで記載されており、if文で該当値を取得・分岐することで可能となった。
 %
 \subsubsection{remove\_low\_card()}
 \paragraph{何の処理？}\mbox{}\\
+配列cards[][]の指定されたエリアの値をすべて0とする処理。
 \paragraph{配列への処理内容}\mbox{}\\
+第一引数のcards[i][j]において、第二引数で指定されたi以上/以下(jは任意)にて指定された部分を0とする。以上/以下は第三引数rev(革命の有無)が0なら以下、1ならば以上を採用する。
 \paragraph{機能実現への決め手}\mbox{}\\
+if文で第三引数revの有無で処理を分け、それぞれでfor文を2重にネストして0とするエリアを網羅的に指定することで可能となった。
 %
 \subsubsection{remove\_suit()}
 \paragraph{何の処理？}\mbox{}\\
+縛りが発動している際に、指定スート以外のカードを出せないように制限する処理。
 \paragraph{配列への処理内容}\mbox{}\\
+第一引数cards[i][j]に対して、第二引数suit[i]と第三引数flag(0か1)の合計値が偶数ならば、該当するcards[i][j]のi行中の任意のj列の値を0とする。
 \paragraph{機能実現への決め手}\mbox{}\\
+for文でまずsuit[i]を調べ、flagとの合計値が偶数であることをif文と剰余演算子でキャッチする。
+該当する列を、ネストされたfor文でjを0-14まで動かして0を代入することで可能となった。
 %
 \subsubsection{count\_cards()}
 \paragraph{何の処理？}\mbox{}\\
+受け取ったプレーヤーが所持しているカード枚数の合計を返す処理。
 \paragraph{配列への処理内容}\mbox{}\\
+第一引数として受け取ったcards[i][j]において、i<5, j任意の条件下で0でない=所持しているカードがあれば、枚数をカウントするquantity変数をインクリメントする。
+すべてのエリアを参照したら、quantityを返す。
 \paragraph{機能実現への決め手}\mbox{}\\
+for文を2重にネストし、iの条件を5未満に制限することで純粋にカード所持情報を取得することが可能となった。
 %
 \subsection{select\_cards.c}
 %
 \subsubsection{select\_change\_cards()}
 \paragraph{何の処理？}\mbox{}\\
+試合開始前に行われる貧民・大貧民→大富豪・富豪の最も弱い1-2枚のカードの譲渡を管理する処理。
 \paragraph{配列への処理内容}\mbox{}\\
+基本的にこの関数は直接配列への代入は行わず、先述のcommon.c記載関数の組み合わせが行われている。
+第一引数out\_cards[][]は譲渡するカードを表すため、clear\_table()を呼び出して初期化する。
+その後out\_cards[][]と第二引数my\_cards[][]に対して、交換する枚数が指定された第三引数num\_of\_changeの数だけ、search\_low\_card()とdiff\_cards()とor\_cards()を繰り返して、my\_cards[][]からout\_cards[][]に譲渡する。
 \paragraph{機能実現への決め手}\mbox{}\\
+common.cにて作成した関数を組み合わせ、my\_cards[][]から譲渡するout\_cards[][]を作成することにより、可能なものとなった。
 %
 \subsubsection{select\_submit\_cards()}
 \paragraph{何の処理？}\mbox{}\\
+場に出すカードを選択する処理。
 \paragraph{配列への処理内容}\mbox{}\\
+　まず、場に出すカードを表すカードテーブルselect\_cards[8][15]を定義し、clear\_table()により初期化する。
+
+その後、革命中(field\_status内メンバis\_rev)・新たな場(field\_status内メンバis\_no\_card)によって場に出すカードを指定する関数を使い分けている。使用する関数は以下に表される。
+
+なお、渡す引数はselect_cards,　my_cards, field_statusと共通している。
+\begin{table}[hbtp]
+  \caption{使用する関数名}
+  \centering
+  \begin{tabular}{lcrr}
+    状態 & 通常: is\_rev=0 & 革命: is\_rev=1\\
+    新場: is\_no\_card=1  & select_cards\_free & select\_cards\_free\_rev \\
+    既存場: is\_no\_card=0  & select\_cards\_restrict & select\_cards\_restrict\_rev \\
+  \end{tabular}
+\end{table}
 \paragraph{機能実現への決め手}\mbox{}\\
-%
-\subsubsection{select\_cards\_restrict()}
-\paragraph{何の処理？}\mbox{}\\
-\paragraph{配列への処理内容}\mbox{}\\
-\paragraph{機能実現への決め手}\mbox{}\\
+上記のように、field\_status内メンバによって呼び出す関数を使い分けることにより、革命・や場の状況に応じて最適なカードを出すことが可能となった。
 %
 \subsubsection{select\_cards\_free()}
 \paragraph{何の処理？}\mbox{}\\
+場にカードがなにもないときに呼び出され、手札で最も弱いカードを場に出す処理。
 \paragraph{配列への処理内容}\mbox{}\\
+daihinmin.cにて定義されたsearch\_low\_card()関数へ提出するカードを記した第一引数select\_cards[][]と、手札を記した第二引数my\_cards[][]と、Jokerを使わないことを表す0をそれぞれ引数として渡している。
 \paragraph{機能実現への決め手}\mbox{}\\
+daihinmin.cのsearch\_low\_cardへそのまま引数として受け取った配列を渡すことにより、実現可能となった。
+%
+\subsubsection{select\_cards\_restrict()}
+\paragraph{何の処理？}\mbox{}\\
+場にカードが既にあるときに呼び出され、更に場の状況に応じて出すことが可能なカードを場に出す処理。
+\paragraph{配列への処理内容}\mbox{}\\
+　まず、場に出すことができるカードを記載するカードテーブルtmp\_cards[][]配列を定義し、copy\_table関数にて第二引数の手札のカードテーブルmy\_cards[][]配列の内容をコピーする。
 
+その次にif文として第三引数field\_status内メンバis\_sequenceが1のときと、quantityが1のときをそれぞれ検知し、更に縛りの有無によって分岐が用意されているが、中身は実装されていない。
+
+処理が実装されているのは場が単騎のみの場合で、この時に場が縛られている(field\_status内メンバis\_lockの値の有無)かをif文で検知し分岐している。
+縛られているときはremove\_suit関数を先に入れてtmp\_cards[][]を縛られたスートに制限する。
+その後は両者共通でremove\_low\_card()によって、tmp\_cards[][]内で場のカードより弱いカードを削除する。
+最後に、search\_low\_card()にて、場に出せられるカードが記載されたtmp\_cards[][]から最も弱いカードを指定し、第一引数select\_cards[][]に反映する。
+\paragraph{機能実現への決め手}\mbox{}\\
+まず場の状況が階段・ペア・単騎によって分け、更に縛られている・いない場合によって分けることで、それぞれの状況に応じた処理を実装することが可能となった。
+%
 \end{document}
