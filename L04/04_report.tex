@@ -40,9 +40,34 @@
 \end{figure}
 
 \subsection{配列に対する操作}
+\subsubsection{make_info_table()}
+第一引数info_cards配列を初期化したのち、各数字におけるカードの枚数(第二引数my_cards配列1-3行目各列の合計)を、info_table配列4行目に記録する。
+\subsubsection{search_low_pair()}
+まず提出するカードを示す第一引数dst_cards配列を初期化する。
+
+その後、第二引数info_table配列4行目をfor文で要素が2以上(=ペアが存在する)の部分が存在するまでループを回し、
+もしペアが存在するならば、該当する列の第三引数my_cards配列の各行要素をdst_cards配列に代入し、1を返すことで処理を終了する。
+
+もしペアが存在しないならば、0を返すことで処理を終了する。
+\subsubsection{select_cards_free()}
+まず、info_table配列を定義した後、make_info_table関数を呼び出し、info_table配列と第二引数my_cards配列を渡すことで、ペアの情報を取得する。
+
+その後、count_cards()関数を呼び出し、第一引数select_cards配列を渡すことで、出すカードが決定されている状態であるかを調べる。
+もし出すカードが決まっていないのならば、search_low_pair()関数を呼び出し、出せられるペアの中で最弱のものを提出カードに指定する。
+ここでsearch_low_pair()関数にて出せられるペアが存在しないのならば、search_low_cards()関数を呼び出し単騎カードを提出カードに指定する。
 
 \subsection{機能実装の決め手}
+\subsubsection{make_info_table()}
+for文により、my_cards配列0~3行目の任意の列の合計をinfo_table配列4行目の同じ列番号に代入することで、ペア情報の作成が可能となっている。
+\subsubsection{search_low_pair()}
+まず、for文でinfo_table配列4行目にてペアを出せられる数字があるかを1行目から調べ、i列に存在した時点でbreakしている。
+これにより、その直後にif(i<=13)とすることで、ペアが存在しない = iが14 (= ペアが存在すれば14に達する前にbreakされている)ケースは、
+ペアを指定するシーケンスをパスすることが可能となっている。
 
+\subsubsection{select_cards_free()}
+提出カードを指定するときに、search_low_pair()関数或いはsearch_low_card()関数を呼び出す前に、
+if(count_cards(select_cards)==0)を活用している。これにより、先に提出カードにペアが指定された後に、
+単騎提出カードに上書き指定されるのを防ぐことが可能となっている。
 \section{課題8}
 \subsection{スクリーンショット}
 \begin{figure}[h]
