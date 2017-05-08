@@ -1,0 +1,100 @@
+\documentclass[11pt,a4paper, uplatex]{jsarticle}
+%
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{ascmac}
+\usepackage{listings}
+\usepackage{underscore}
+\lstset{
+    frame=single,
+    numbers=left,
+    tabsize=2
+}
+%
+\setlength{\textwidth}{\fullwidth}
+\setlength{\textheight}{40\baselineskip}
+\addtolength{\textheight}{\topskip}
+\setlength{\voffset}{-0.2in}
+\setlength{\topmargin}{0pt}
+\setlength{\headheight}{0pt}
+\setlength{\headsep}{0pt}
+%
+\newcommand{\divergence}{\mathrm{div}\,}  %ダイバージェンス
+\newcommand{\grad}{\mathrm{grad}\,}  %グラディエント
+\newcommand{\rot}{\mathrm{rot}\,}  %ローテーション
+%
+\title{プログラミング言語実験・Ｃ言語 第４回課題レポート}
+\author{1510151  栁 裕太}
+\date{\today}
+\begin{document}
+\maketitle
+\section{課題7}
+%
+\subsection{スクリーンショット}
+
+\begin{figure}[h]
+  \centering
+  \caption{実際にペアが出された時のスクリーンショット}
+  \includegraphics[width=120mm]{ex07.eps}
+\end{figure}
+
+\subsection{配列に対する操作}
+\subsubsection{make_info_table()}
+第一引数info_cards配列を初期化したのち、各数字におけるカードの枚数(第二引数my_cards配列1-3行目各列の合計)を、info_table配列4行目に記録する。
+\subsubsection{search_low_pair()}
+まず提出するカードを示す第一引数dst_cards配列を初期化する。
+
+その後、第二引数info_table配列4行目をfor文で要素が2以上(=ペアが存在する)の部分が存在するまでループを回し、
+もしペアが存在するならば、該当する列の第三引数my_cards配列の各行要素をdst_cards配列に代入し、1を返すことで処理を終了する。
+
+もしペアが存在しないならば、0を返すことで処理を終了する。
+\subsubsection{select_cards_free()}
+まず、info_table配列を定義した後、make_info_table関数を呼び出し、info_table配列と第二引数my_cards配列を渡すことで、ペアの情報を取得する。
+
+その後、count_cards()関数を呼び出し、第一引数select_cards配列を渡すことで、出すカードが決定されている状態であるかを調べる。
+もし出すカードが決まっていないのならば、search_low_pair()関数を呼び出し、出せられるペアの中で最弱のものを提出カードに指定する。
+ここでsearch_low_pair()関数にて出せられるペアが存在しないのならば、search_low_cards()関数を呼び出し単騎カードを提出カードに指定する。
+
+\subsection{機能実装の決め手}
+\subsubsection{make_info_table()}
+for文により、my_cards配列0~3行目の任意の列の合計をinfo_table配列4行目の同じ列番号に代入することで、ペア情報の作成が可能となっている。
+\subsubsection{search_low_pair()}
+まず、for文でinfo_table配列4行目にてペアを出せられる数字があるかを1行目から調べ、i列に存在した時点でbreakしている。
+これにより、その直後にif(i<=13)とすることで、ペアが存在しない = iが14 (= ペアが存在すれば14に達する前にbreakされている)ケースは、
+ペアを指定するシーケンスをパスすることが可能となっている。
+
+\subsubsection{select_cards_free()}
+提出カードを指定するときに、search_low_pair()関数或いはsearch_low_card()関数を呼び出す前に、
+if(count_cards(select_cards)==0)を活用している。これにより、先に提出カードにペアが指定された後に、
+単騎提出カードに上書き指定されるのを防ぐことが可能となっている。
+\section{課題8}
+\subsection{スクリーンショット}
+\begin{figure}[h]
+  \centering
+  \caption{実際に階段が出された時のスクリーンショット}
+  \includegraphics[width=120mm]{ex08.eps}
+\end{figure}
+\subsection{配列に対する操作}
+\subsubsection{make_info_table()}
+課題7に加え、for文内に更にfor文をネストし、my_cards配列各行における要素において、連続して次の列が1である(3つ1が続く=階段を出せられる)回数を数え、
+その結果をinfo_tableの同一行・列に代入する。
+\subsubsection{search_low_sequence()}
+まず、提出するカードを指定する第一引数dst_cards配列を初期化する。
+その後、for文を2重にネストし、第二引数info_table配列の各要素を調べ、
+3以上=同一スートで連続して3枚以上のカードが存在する (=階段が出せられる)ならば、dst_cards配列の該当する階段のエリアの部分に1を代入し、1を返す。
+もし階段を出せられないならば、0を返し処理を終了する。
+\subsubsection{select_cards_free()}
+課題7の記述において、if文の後にsearch_low_pair()関数を呼び出す部分の前に、また同じif文で提出カードが決定しているかを調べ、
+決まっていないならばsearch_low_sequence()関数を呼び出し、階段が出せられるかどうかを調べている。
+\subsection{機能実装の決め手}
+\subsubsection{make_info_table()}
+for文を2重にネストし、更にその中にwhile文をネストすることで、すべての要素を網羅的に調べることが可能となった。
+\subsubsection{search_low_sequence()}
+for文を2重にネストする際、列の上限を11にした。これは、12列目以降では、階段の成立はあり得ない(数字は13種類)ためである。
+\subsubsection{select_cards_free()}
+課題7で作成した「ペアがあるかをまず調べ、ないのならば単騎カードを出す」の流れの頭に、「階段があるかを調べる」ことで、
+提出カードのパターンの優先順位をより実戦に近づけることが可能となった。
+%
+%
+\end{document}
