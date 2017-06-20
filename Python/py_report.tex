@@ -1,0 +1,85 @@
+\documentclass[11pt,a4paper, uplatex]{jsarticle}
+%
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{ascmac}
+\usepackage{listings}
+\usepackage{underscore}
+\lstset{
+    frame=single,
+    numbers=left,
+    tabsize=2
+}
+%
+\setlength{\textwidth}{\fullwidth}
+\setlength{\textheight}{40\baselineskip}
+\addtolength{\textheight}{\topskip}
+\setlength{\voffset}{-0.2in}
+\setlength{\topmargin}{0pt}
+\setlength{\headheight}{0pt}
+\setlength{\headsep}{0pt}
+%
+\newcommand{\divergence}{\mathrm{div}\,}  %ダイバージェンス
+\newcommand{\grad}{\mathrm{grad}\,}  %グラディエント
+\newcommand{\rot}{\mathrm{rot}\,}  %ローテーション
+%
+\title{プログラミング言語実験・Python 課題レポート}
+\author{1510151  栁 裕太}
+\date{\today}
+\begin{document}
+\maketitle
+\section{課題1}
+\subsection{課題1-1 実験結果}
+実行結果テキスト: https://goo.gl/hsNwv9
+%
+\subsection{課題1-2 実験結果}
+実行結果テキスト: https://goo.gl/Ub99j3
+%
+\section{課題2}
+\subsection{課題2-1 実験結果}
+実行結果音声: https://goo.gl/nHjB7b
+%
+\subsection{課題2-2 実験結果}
+実行結果画像: https://goo.gl/HcXeHH
+%
+\section{課題3}
+\subsection{課題3-1 実験結果}
+実行結果テキスト: https://goo.gl/tCwXMp
+%
+\subsection{課題3-2 実験結果}
+実行結果音声: https://goo.gl/krFJQF
+
+\section{課題4}
+\subsection{課題4 実験結果}
+\subsubsection{処理前音声プロット結果}
+HAL0001noiseColored.wav: https://goo.gl/9eiFYw
+
+HAL0002noiseColored.wav: https://goo.gl/B74rsM
+
+KnoiseColored.wav: https://goo.gl/UvwktX
+%
+\subsubsection{周波数を切った場所}
+答え: 4KHz
+
+理由: 3種のパワースペクトルのグラフにおける、10KHzを山とするホワイトノイズが消える
+(中央左右におけるVoiceと思われる部分と交わる)場所が4KHzの場所だったため
+%
+\subsubsection{処理後音声ファイル}
+HAL0001noiseCleared.wav: https://goo.gl/kb5P7v
+
+HAL0002noiseCleared.wav: https://goo.gl/URiKdK
+
+KnoiseCleared.wav: https://goo.gl/pJ6Gcj
+%
+\subsubsection{処理後音声プロット結果}
+HAL0001noiseCleared.wav: https://goo.gl/uwPRnR
+
+HAL0002noiseCleared.wav: https://goo.gl/WNqKnb
+
+KnoiseCleared.wav: https://goo.gl/ag8GnT
+%
+
+\subsubsection{何と言っているか}
+what_are_they_saying.md: https://goo.gl/GRtTaw
+\end{document}
