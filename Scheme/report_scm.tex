@@ -87,7 +87,7 @@
 リスト同士を結合する\texttt{append}関数を、
 リストの全ての要素を対象とするために\texttt{apply}関数
 を活用して1次元のシンプルなリストを作成した。
-\begin{lstlisting}[language=lisp, caption=\texttt{get-depth}関数実行例()]
+\begin{lstlisting}[language=lisp, caption=\texttt{get-depth}関数実行例]
   (義直 秀忠 頼宣 頼房)
   (綱誠 綱吉 綱重 家綱 綱教 頼職 吉宗 綱条 頼候)
   (家斎 斎敦 斎匡)
@@ -137,7 +137,7 @@
 それぞれの結果を加算して、その結果で得られた値を\texttt{get-depth}関数への引数\texttt{depth}
 として活用し、戻ってきた結果をそのまま返している。
 
-\begin{lstlisting}[language=lisp, caption=\texttt{get-cousin}関数実行例()]
+\begin{lstlisting}[language=lisp, caption=\texttt{get-cousin}関数実行例]
   (義直 秀忠 頼宣 頼房)
   (綱誠 綱吉 綱重 家綱 綱教 頼職 吉宗 綱条 頼候)
   (家斎 斎敦 斎匡)
@@ -154,17 +154,73 @@
 \section{課題3}
 \subsection{diff関数}
 \subsubsection{設計上の留意点}
-\subsubsection{実行例}
+引数として受け取った要素を、まずは\texttt{cond}で場合分けしている。
+場合分けの順序と方針は、課題3-1のヒント
+(\url{https://www.ied.inf.uec.ac.jp/text/laboratory/scheme/ex-2017/ex-3-1.html})
+に準拠している。もしもどれにも該当しないならば、子の要素に対し\texttt{diff}関数を再帰的に適用している。
+ここでは、加算・減算・乗算・累乗の詳細な処理内容について記載する。
+
+加算/除算(先頭要素が"+"/"-")であれば、二番目以下の要素全てを対象に\texttt{diff}関数を再帰的に適用し、
+帰ってきた値同士を\texttt{map}で加算/除算を行っている。
+
+乗算(先頭要素が"*")であれば、(+ (* 第1引数 第2引数の微分) (* 第1引数の微分 第2引数))の木を、
+第1引数は\texttt{(car (cdr ls))}で、第二引数なら\texttt{(car (cddr ls))}で抜き出し、
+微分するならこの式を\texttt{diff}の引数として丸括弧で囲うことで対処している。
+なお、行列の要素なのか計算するべき式なのか区別させるため、
+準クォートを採用して引数を抜き出す式の前にカンマを置くことで対処している。
+
+累乗(先頭要素が"**")であれば、乗算と同じ手法で、
+(* 第2引数 (* 第1引数の微分 (** 第1引数 (- 第2引数 1))))の木を形成している。
+
+\begin{lstlisting}[language=lisp, breaklines=true, caption=\texttt{diff}関数実行例]
+  1
+  (+ 1 0)
+  (+ (* 2 (* 1 (** x 1))) (- (+ (* 4 1) (* 0 x)) 0))
+  (+ (* 6 (* 1 (** x 5))) (+ (* -2 (* 2 (* 1 (** x 1)))) (* 0 (** x 2))) 0)
+\end{lstlisting}
 \subsubsection{考察}
+準クォートを多用した。特に、乗算・累乗の場合の式の返し方にて、準クォートを使うのはわかったものの、
+どのタイミングでカンマを入れるべきなのかがこの課題の肝であると読み取れた。
+何故ならば、カンマの入れるタイミングを誤ると、評価されるべき式(累乗の"(- 第2引数 1)"など)が
+評価されず、あるいはシンボルを含む評価できない式を評価しようとしてエラーを吐くこととなったためである。
 
 \subsection{tangent関数}
 \subsubsection{設計上の留意点}
-\subsubsection{実行例}
+接線の方程式を求める公式を、Scheme上で実現する形をとっている。具体的には、
+1次のxの項を求める\texttt{tangent-fa}関数と、
+定数項を求める\texttt{tangent-a}関数を作成した。
+\texttt{tangent}関数では、
+第一引数のxの座標\texttt{a}と第二引数のy座標\texttt{fa}を使用して、
+\texttt{tangent-fa}関数と\texttt{tangent-a}関数の返した値をもとに接線の方程式を返すようにしている。
+\begin{lstlisting}[language=lisp, breaklines=true, caption=\texttt{tangent}関数実行例()]
+  (+ (* 4 x) 1)
+  (+ (* 184 x) -309)
+\end{lstlisting}
 \subsubsection{考察}
+\texttt{tangent-fa, tangent-a}の2つの関数の共通点は、\texttt{eval}式を使用して、
+\texttt{a}を基に評価した値を返していることが挙げられる。
+双方の違いは、\texttt{tangent-fa}では微分した式を、\texttt{tangent-a}は式そのものを評価している点である。
+
+また、\texttt{tangent}関数にて接線の方程式を作る際は、\texttt{let}を用いた。
+これによって1次のxの項を\texttt{fda}、定数項を\texttt{fa_val}に束縛することで、
+実際に項を得る部分と式を形成する部分を分離して可読性を上げることに成功した。
+ケースによっては準クォートではなく、
+\texttt{let}で評価する部分と記述する部分を完全に分離した方が可読性が上がるのではないかと考えている。
 
 \subsection{diff2関数}
 \subsubsection{設計上の留意点}
-\subsubsection{実行例}
+基本的な考え方は\texttt{diff}関数と大差はない。
+大きな違いとして挙げられるのは、第二引数として微分する対象の記号を指定することで、
+シンボルが第二引数のシンボルと全く同じなら1を返すようにしたことと、
+再帰呼び出しする際にも第二引数を追加した点にとどまっている。
+\begin{lstlisting}[language=lisp, breaklines=true, caption=\texttt{diff2}関数実行例()]
+  1
+  0
+  (+ (* x 0) (* 1 y))
+  (+ (+ (* y 0) (* 1 x)) (- (* 2 (* 1 (** y 1))) 0))
+\end{lstlisting}
 \subsubsection{考察}
-
+単純な微分から偏微分への改変には、個人的には少々大掛かりな変更が入るのではないかと考えていたが、
+かなりシンプルな変更で済むこととなった。
+これもまた、再帰呼出で処理を行うSchemeの長所として考えることができるのではないかと考えた。
 \end{document}
