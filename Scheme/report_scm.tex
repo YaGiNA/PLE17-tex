@@ -4,7 +4,7 @@
 \usepackage{bm}
 \usepackage[dvipdfmx]{graphicx}
 \usepackage{ascmac}
-\usepackage{listings}
+\usepackage{listings,jlisting}
 \usepackage{underscore}
 \usepackage{url}
 \lstset{
@@ -75,14 +75,81 @@
 \section{課題2}
 \subsection{get-depth関数}
 \subsubsection{設計上の留意点}
-\subsubsection{実行例}
+家系図の任意の深さまで探索を行い、所定の深さに存在する要素をリスト化するのが目的である。
+\texttt{cond}で条件わけをする際は、まずデータが空の場合は空を返すように指定した。
+その次に、第二引数として受け取った\texttt{depth}の値を調べる。
+もし値が0だったならば、木の親を取り出した要素によるリストを返す。
+それ以外で、もし1だった場合は、子の枝を抹消し、親の要素を返す。
+\texttt{depth}が2以上だった場合は\texttt{get-depth}関数を、
+子の部分木を第一引数として、第二引数は\texttt{depth}をデクリメントした値を渡す再帰呼び出しを行う。
+
+ただ、そのままだと丸括弧が無駄に残ってしまう(空の部分木が残る)ため、
+リスト同士を結合する\texttt{append}関数を、
+リストの全ての要素を対象とするために\texttt{apply}関数
+を活用して1次元のシンプルなリストを作成した。
+\begin{lstlisting}[language=lisp, caption=\texttt{get-depth}関数実行例()]
+  (義直 秀忠 頼宣 頼房)
+  (綱誠 綱吉 綱重 家綱 綱教 頼職 吉宗 綱条 頼候)
+  (家斎 斎敦 斎匡)
+  (家康)
+\end{lstlisting}
 \subsubsection{考察}
+指定の深さに該当する名前のみのS式は構成に成功した。
+これは、\texttt{depth}を再帰呼出しでデクリメントしておく必要性を知ることが可能となったためである。
+
+しかしながら、そのS式を単純なリストにする点で難航した。
+それは、Schemeがリスト同士を結合して1つのリストを構成する\texttt{apply}関数を、
+結果として得られたS式の要素1つ1つを対象とするために\texttt{apply}関数を活用する必要がある点に
+気づくのが遅れた点が挙げられる。
+
+また、今回作成したコードはもう少し改善の余地が挙げられる。
+特に、以下のコードには改善の余地がある。
+\begin{lstlisting}[language=lisp, caption=\texttt{get-depth}関数一部]
+  (cond ((null? ls) '() )
+        ((= depth 0) (list (car ls)))
+        ((= depth 1) (map car (cdr ls)))
+        (else
+          (apply append
+            (map
+              (lambda (ls)
+                (get-depth ls (- depth 1))
+              )
+              (cdr ls)
+            )))
+  )
+\end{lstlisting}
+この中で、\texttt{depth}の値が0、及び1だった場合は、それぞれ特別扱いして処理を入れているが、
+該当部分を1行で表現する手段がないか模索したものの、断念に至っている。
 
 \subsection{get-cousin関数}
 \subsubsection{設計上の留意点}
-\subsubsection{実行例}
-\subsubsection{考察}
+この関数では、検索部分と、検索結果の処理部分に分割している。
+具体的には、実際に第二引数の名前を検索し、該当箇所の深さの数値を返す\texttt{search}関数と、
+その結果を基に同じ深さの名前のリストを作成して返す\texttt{get-cousin}関数となっている。
 
+\texttt{search}関数では、引数として木と名前と調べる深さの3種をもち、
+もし要素が空であれば0を返し、リストの要素内に名前があれば、深さの値を返す。
+要素はあれど名前が発見されなければ、
+深さ\texttt{depth}をインクリメントして\texttt{search}関数を各枝を対象に再帰呼出を行い、
+帰ってきた数値の総計を返すようになっている。
+
+\texttt{get-cousin}関数では、まず親を抜いた枝の全要素に\texttt{search}関数による探索をかけ、
+それぞれの結果を加算して、その結果で得られた値を\texttt{get-depth}関数への引数\texttt{depth}
+として活用し、戻ってきた結果をそのまま返している。
+
+\begin{lstlisting}[language=lisp, caption=\texttt{get-cousin}関数実行例()]
+  (義直 秀忠 頼宣 頼房)
+  (綱誠 綱吉 綱重 家綱 綱教 頼職 吉宗 綱条 頼候)
+  (家斎 斎敦 斎匡)
+  (家康)
+\end{lstlisting}
+\subsubsection{考察}
+\texttt{search}関数でも、\texttt{get-cousin}関数でも\texttt{lambda}式を使用しているが、
+無名関数として行っている処理はほぼ同一である(ソースコード参照)。
+唯一の違いは\texttt{search}関数を呼び出す際の第二引数が、
+\texttt{search}関数ならば\texttt{depth}をインクリメントした数であり、
+\texttt{get-cousin}関数ならば最初の枝を表す1となっている点となっている。
+これは、2関数間であっても、再帰呼出の戦略はほぼ同じであることを示唆している。
 
 \section{課題3}
 \subsection{diff関数}
