@@ -6,6 +6,7 @@
 \usepackage{ascmac}
 \usepackage{listings}
 \usepackage{underscore}
+\usepackage{url}
 \lstset{
     frame=single,
     numbers=left,
@@ -29,52 +30,46 @@
 \date{\today}
 \begin{document}
 \maketitle
-\section{課題1}
-\subsection{設計上の留意点}
-\subsection{実行例}
-\subsection{考察}
-\documentclass[11pt,a4paper, uplatex]{jsarticle}
-%
-\usepackage{amsmath,amssymb}
-\usepackage{bm}
-\usepackage[dvipdfmx]{graphicx}
-\usepackage{ascmac}
-\usepackage{listings}
-\usepackage{underscore}
-\lstset{
-    frame=single,
-    numbers=left,
-    tabsize=2
-}
-%
-\setlength{\textwidth}{\fullwidth}
-\setlength{\textheight}{40\baselineskip}
-\addtolength{\textheight}{\topskip}
-\setlength{\voffset}{-0.2in}
-\setlength{\topmargin}{0pt}
-\setlength{\headheight}{0pt}
-\setlength{\headsep}{0pt}
-%
-\newcommand{\divergence}{\mathrm{div}\,}  %ダイバージェンス
-\newcommand{\grad}{\mathrm{grad}\,}  %グラディエント
-\newcommand{\rot}{\mathrm{rot}\,}  %ローテーション
-%
-\title{プログラミング言語実験・Python 課題レポート}
-\author{1510151  栁 裕太}
-\date{\today}
-\begin{document}
-\maketitle
 
 \section{課題1}
 \subsection{map-tree関数}
 \subsubsection{設計上の留意点}
-\subsubsection{実行例}
+基本的には、ヒントページ
+(\url{https://www.ied.inf.uec.ac.jp/text/laboratory/scheme/ex-2017/ex-1-hint1.html})
+のその1の雛形に沿って作成した。ヒントページの空欄には、ドット対でない場合にのみ呼び出される処理が入る。
+ここで、木の枝(\texttt{car, cdr}で指定)を対象にもう一度\texttt{map-tree}関数を再帰呼出し、
+結果を\texttt{cons}で繋いでドット対を形成している。
+\begin{lstlisting}[language=lisp, caption=\texttt{map-tree}関数実行例(対象関数:\texttt{even?})]
+  (#f (#t (#f #t)) #t (#f #t #f))
+  ((#f (#t (#f #t)) #t) (#f #t #f))
+\end{lstlisting}
+
 \subsubsection{考察}
+課題の本意通り、\texttt{map}関数と同等の処理を、S式によって作成された木構造にも適用することができた。
+\texttt{car, cdr}で枝を指定することが、処理を実現する最大の決め手になったと考えている。
+
+また、各要素に対する引数に指定された関数の結果を基に、木をまた再構成しているが、こちらも
+再帰呼出しで結果を問い合わせ、それを基に\texttt{cons}で繋いで引数の木構造を再現できている。
+これもまた、再帰呼出しを活用するメリットなのではないかと考えている。
 
 \subsection{map-tree2関数}
 \subsubsection{設計上の留意点}
-\subsubsection{実行例}
+基本的には、ヒントページ
+(\url{https://www.ied.inf.uec.ac.jp/text/laboratory/scheme/ex-2017/ex-1-hint1.html})
+のその1の雛形に沿って作成したものの、空欄部分を変更した。
+まず\texttt{map}関数を指定し、使用する関数には\texttt{lambda}式を使い、
+「\texttt{map-tree2}関数に引数として受け取った関数と木の結果を出力する」無名関数を指定し、
+無名関数への引数としても当該関数が受け取った木を指定している。
+\begin{lstlisting}[language=lisp, caption=\texttt{map-tree2}関数実行例(対象関数:\texttt{even?})]
+  (#f (#t (#f #t)) #t (#f #t #f))
+  ((#f (#t (#f #t)) #t) (#f #t #f))
+\end{lstlisting}
 \subsubsection{考察}
+\texttt{map-tree}関数では、わざわざ枝を分割して再帰呼出を行っていた。
+しかしながら、今回の\texttt{map-tree2}関数では、
+単純に\texttt{map}関数で全ての枝の要素を対象に\texttt{map-tree2}関数再帰呼出を、
+\texttt{lambda}式による無名関数を活用して行っている。
+これは、再帰呼出を行うケースは、受け取った第二引数が部分木である場合に限定されるからであることが考えられる。
 
 
 \section{課題2}
